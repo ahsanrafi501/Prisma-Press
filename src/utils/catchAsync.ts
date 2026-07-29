@@ -10,7 +10,7 @@ export const catchAsync = (fn: RequestHandler) => {
             res.status(httpstatus.INTERNAL_SERVER_ERROR).json({
                 success: false,
                 statusCode: httpstatus.INTERNAL_SERVER_ERROR,
-                message: "Failed to register user",
+                message: (error as Error).message || "Something went wrong",
                 error: (error as Error).message
             })
         }
