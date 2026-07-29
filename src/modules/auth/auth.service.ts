@@ -12,7 +12,7 @@ const loginUser = async (payload: ILoginUser) => {
         where: { email },
     })
 
-    if (user.activeStatus = "BLOCKED") {
+    if (user.activeStatus === "BLOCKED") {
         throw new Error("Your account has been blocked, please contact support")
     }
 
