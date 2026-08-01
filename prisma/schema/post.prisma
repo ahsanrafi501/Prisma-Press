@@ -6,7 +6,7 @@ model Post {
   isFeature Boolean    @default(false)
   status    PostStatus @default(PUBLISHED)
   tag       String[]
-  views     BigInt     @default(0)
+  views     Int     @default(0)
   authorID  String
   author    User       @relation(fields: [authorID], references: [id])
   createdAt DateTime   @default(now())
