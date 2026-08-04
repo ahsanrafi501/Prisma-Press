@@ -1,5 +1,5 @@
 import { title } from "node:process";
-import { commentStatus, PostStatus } from "../../../generated/prisma/enums";
+import { CommentStatus, PostStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 import { ICreatePostPayload, IPostQuery, IUpdatePostPayload } from "./post.interface";
 import { PostWhereInput } from "../../../generated/prisma/models";
@@ -303,7 +303,7 @@ const updatePostIntoDB = async (postId: string, payload: IUpdatePostPayload, aut
                     },
                     comments: {
                         where: {
-                            status: commentStatus.APPROVED
+                            status: CommentStatus.APPROVED
                         }
                     },
                     _count: {
@@ -356,12 +356,12 @@ const getPostStatsFromDB = async () => {
 
                     await tx.comment.count({
                         where: {
-                            status: commentStatus.APPROVED
+                            status: CommentStatus.APPROVED
                         }
                     }),
                     await tx.comment.count({
                         where: {
-                            status: commentStatus.REJECTED
+                            status: CommentStatus.REJECTED
                         }
                     }),
 

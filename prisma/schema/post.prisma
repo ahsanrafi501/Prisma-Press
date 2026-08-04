@@ -7,6 +7,7 @@ model Post {
   status    PostStatus @default(PUBLISHED)
   tag       String[]
   views     Int     @default(0)
+  isPremium Boolean @default(false)
   authorID  String
   author    User       @relation(fields: [authorID], references: [id])
   createdAt DateTime   @default(now())
