@@ -1,6 +1,8 @@
+import { title } from "node:process";
 import { commentStatus, PostStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
-import { ICreatePostPayload, IUpdatePostPayload } from "./post.interface";
+import { ICreatePostPayload, IPostQuery, IUpdatePostPayload } from "./post.interface";
+import { PostWhereInput } from "../../../generated/prisma/models";
 
 const createPostIntoDB = async (payload: ICreatePostPayload, userId: string) => {
     const result = await prisma.post.create({
@@ -12,7 +14,51 @@ const createPostIntoDB = async (payload: ICreatePostPayload, userId: string) => 
     return result;
 }
 
-const getAllPostsFromDB = async () => {
+const getAllPostsFromDB = async (query: IPostQuery) => {
+
+    const limit = query.limit ? Number(query.limit) : 10;
+    const page = query.page ? Number(query.page) : 1;
+    const skip = (page - 1) * limit;
+    const sortBy = query.orderBy ? query.orderBy : "createdAt";
+    const sortOrder = query.sortOrder ? query.sortOrder : "desc";
+
+    const andConditions: PostWhereInput[] = [];
+
+    if (query.searchTerm) {
+        andConditions.push({
+            
+                OR: [
+                    {
+                        title: {
+                            contains: query.searchTerm,
+                            mode: "insensitive",
+                        },
+
+                    },
+                    {
+                        content: {
+                            contains: query.searchTerm,
+                            mode: "insensitive"
+                        }
+                    }
+                ]         
+        })
+    }
+
+    if(query.title){
+        andConditions.push(
+            {
+                title: query.title
+            }
+        )
+    }
+
+    if(query.content){
+        andConditions.push({
+            content: query.content
+        })
+    }
+
     const posts = await prisma.post.findMany({
 
         // searching and partial match
@@ -40,31 +86,89 @@ const getAllPostsFromDB = async () => {
 
         // filtering and searching combined 
 
+        // where: {
+        //     AND: [
+        //         {
+        //             OR: [
+        //                 {
+        //                     title: {
+        //                         contains: "about",
+        //                         mode: "insensitive"
+        //                     }
+        //                 },
+        //                 {
+        //                     content: {
+        //                         contains: "Best",
+        //                         mode: "insensitive"
+        //                     },
+        //                 },
+        //             ],
+        //         },
+        //         {
+        //             title: "About CR7",
+        //         },
+        //         {
+        //             content: "CR7 is the best"
+        //         }
+        //     ]
+        // },
+
+        // take: 1,
+        // skip: 0,
+
+        // // sorting in ascinding or descinding order
+        // orderBy: {
+        //     createdAt: "desc",
+        //     title: "asc",
+        //     content: "asc"
+        // },
+
+
+        // where: {
+        //     AND: [
+
+        //         query.searchTerm ? {
+        //             OR: [
+        //                 {
+        //                     title: {
+        //                         contains: query.searchTerm,
+        //                         mode: "insensitive",
+        //                     },
+
+        //                 },
+        //                 {
+        //                     content: {
+        //                         contains: query.searchTerm,
+        //                         mode: "insensitive"
+        //                     }
+        //                 }
+        //             ]
+        //         } : {},
+
+
+
+        //         // Title filtering
+        //         query.title ? {
+        //             title: query.title
+        //         } : {},
+
+        //         // Content filtering
+        //         query.content ? {
+        //             content: query.content
+        //         } : {}
+        //     ],
+        // },
+
         where: {
-            AND: [
-                {
-                    OR: [
-                        {
-                            title: {
-                                contains: "about",
-                                mode: "insensitive"
-                            }
-                        },
-                        {
-                            content: {
-                                contains: "Best",
-                                mode: "insensitive"
-                            },
-                        },
-                    ],
-                },
-                {
-                    title: "About CR7",
-                },
-                {
-                    content: "CR7 is the best"
-                }
-            ]
+            AND: andConditions
+        },
+
+        take: limit,
+        skip: skip,
+
+        orderBy: {
+            //sortBy: sortOrder
+            [sortBy]: sortOrder
         },
 
         include: {
