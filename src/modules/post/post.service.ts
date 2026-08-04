@@ -21,6 +21,9 @@ const getAllPostsFromDB = async (query: IPostQuery) => {
     const skip = (page - 1) * limit;
     const sortBy = query.orderBy ? query.orderBy : "createdAt";
     const sortOrder = query.sortOrder ? query.sortOrder : "desc";
+    const tag = query.tag ? JSON.parse(query.tag as string) : null;
+    const tagsArray = Array.isArray(tag) ? tag : [];
+
 
     const andConditions: PostWhereInput[] = [];
 
@@ -56,6 +59,34 @@ const getAllPostsFromDB = async (query: IPostQuery) => {
     if(query.content){
         andConditions.push({
             content: query.content
+        })
+    }
+    
+
+    if(query.authorID){
+        andConditions.push({
+            authorID: query.authorID
+        })
+    }
+
+    if(query.isFeature){
+        andConditions.push({
+            isFeature: Boolean(query.isFeature)
+        })
+    }
+
+
+    if(query.tag){
+        andConditions.push({
+            tag:{
+                hasSome: tagsArray
+            }
+        })
+    }
+
+    if(query.status){
+        andConditions.push({
+            status: query.status
         })
     }
 
