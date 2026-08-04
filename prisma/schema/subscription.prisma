@@ -9,6 +9,12 @@ model Subscription {
     status SubscriptionStatus @default(ACTIVE)
 
 
+    //stripe customer id
+    stripeCustomerId String @unique
+
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+
+    @@map("subscriptions")
 }
